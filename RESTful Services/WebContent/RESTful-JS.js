@@ -3,7 +3,8 @@ var Access_Token;
 
 function sendRequest()
 {
-	var queryString = "";
+	var queryString = "type=button&value="+document.getElementById('indexButton').value;
+	
 	doAjax('AppServlet', queryString, 'sendRequest_back', 'post', 0);
 }
 
