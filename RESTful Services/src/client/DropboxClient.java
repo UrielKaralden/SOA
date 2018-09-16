@@ -1,0 +1,171 @@
+package client;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+public class DropboxClient 
+{
+	private static final String APP_KEY = "feczefcf9r4tqkj";
+	private static final String APP_SECRET = "sc2el4p2lvljrb8";
+	private static final String redirectURI = "http://localhost:8080/RESTful_Services/";
+	
+	public DropboxClient(){}
+	
+	 public String sendRequest() throws URISyntaxException, IOException
+	    {
+	    	String str = "";
+	    	URI uri = new URI("https://www.dropbox.com/oauth2/authorize");
+	    	
+	    	StringBuilder requestUri = new StringBuilder(uri.toString());
+	    	requestUri.append("?client_id=");
+	    	requestUri.append(URLEncoder.encode(APP_KEY, "UTF-8"));
+	    	requestUri.append("&response_type=code");
+	    	requestUri.append("&redirect_uri="+redirectURI.toString());
+	    	str = requestUri.toString();
+	    	return str;
+	    }
+	    
+	    public String GetAccessToken (String codeStr) throws URISyntaxException, IOException
+	    {
+	    	String code = "" + codeStr;
+	    	String queryResult;
+	    	
+	    	StringBuilder tokenUri = new StringBuilder("code=");
+	    	tokenUri.append(URLEncoder.encode(code, "UTF-8"));
+	    	tokenUri.append("&grant_type=");
+	    	tokenUri.append(URLEncoder.encode("authorization_code", "UTF-8"));
+	    	tokenUri.append("&client_id=");
+	    	tokenUri.append(URLEncoder.encode(APP_KEY, "UTF-8"));
+	    	tokenUri.append("&client_secret=");
+	    	tokenUri.append(URLEncoder.encode(APP_SECRET, "UTF-8"));
+	    	tokenUri.append("&redirect_uri="+redirectURI);
+	    	
+	    	URL url = new URL("https://api.dropbox.com/oauth2/token");
+	    	
+	    	HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+	    	try
+	    	{
+	    		connection.setDoOutput(true);
+	    		connection.setRequestMethod("POST");
+	    		connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+	    		connection.setRequestProperty("Content-Length",""+tokenUri.toString().length());
+	    		
+	    		OutputStreamWriter outputStreamWriter = new OutputStreamWriter(connection.getOutputStream());
+	    		outputStreamWriter.write(tokenUri.toString());
+	    		outputStreamWriter.flush();
+	    		
+	    		BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+	    		String inputLine;
+	    		StringBuffer response = new StringBuffer();
+	    		
+	    		while ((inputLine = in.readLine())!= null)
+	    		{
+	    			response.append(inputLine);
+	    		}
+	    		in.close();
+	    		
+	    		queryResult = response.toString();
+	    	}
+	    	
+	    	finally
+	    	{
+	    		connection.disconnect();
+	    	}
+	    	
+	    	return queryResult;
+	    }
+	    
+	    public String getAccountInfo(String tokenStr, String accountIDStr)  throws URISyntaxException, IOException
+	    {
+	    	String access_token = ""+tokenStr;
+	    	String content = "{\"account_id\": \""+ accountIDStr +"\"}";
+	    	URL url = new URL("https://api.dropboxapi.com/2/users/get_account");
+	    	
+	    	String queryResult;
+	    	
+	    	HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+	    	try
+	    	{
+	    		connection.setDoOutput(true);
+	    		connection.setRequestMethod("POST");
+	    		connection.setRequestProperty("Authorization", "Bearer " + access_token);
+	    		connection.setRequestProperty("Content-Type", "application/json");
+	    		connection.setRequestProperty("Content-Length", "" + content.length());
+	    		
+	    		OutputStreamWriter outputStreamWriter = new OutputStreamWriter(connection.getOutputStream());
+	    		outputStreamWriter.write(content);
+	    		outputStreamWriter.flush();
+	    		
+	    		BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+	    		String inputLine;
+	    		StringBuffer response = new StringBuffer();
+	    		
+	    		while ((inputLine = in.readLine())!= null)
+	    		{
+	    			response.append(inputLine);
+	    		}
+	    		in.close();
+	    		
+	    		queryResult = response.toString();
+	    	}
+	    	finally
+	    	{
+	    		connection.disconnect();
+	    	}
+	    	return queryResult;
+	    }
+	    
+	    public String uploadFile(String token, String path) throws URISyntaxException, IOException
+	    {
+	    	String queryResult;
+	    	String access_token = "" + token;
+	    	String sourcePath = "" + path;
+	    	Path pathFile = Paths.get(sourcePath);
+	    	byte[] data = Files.readAllBytes(pathFile);
+	    	String content = "{\"path\": \"/RESTful_Services_files/images/image.png\",\"mode\":\"add\",\"autorename\":true,\"mute\":false, \"strict_conflict\":false";
+	    	
+	    	URL url = new URL("https://content.dropboxapi.com/2/files/upload");
+	    	
+	    	HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+	    	try
+	    	{
+	    		connection.setDoOutput(true);
+	    		connection.setRequestMethod("POST");
+	    		connection.setRequestProperty("Authorization", "Bearer " + access_token);
+	    		connection.setRequestProperty("Content-Type", "application/octet-stream");
+	    		connection.setRequestProperty("Dropbox-API-Arg", "" + content);
+	    		connection.setRequestProperty("Content-Length", String.valueOf(data.length));
+	    		
+	    		OutputStreamWriter outputStreamWriter = new OutputStreamWriter(connection.getOutputStream());
+	    		outputStreamWriter.write(content);
+	    		outputStreamWriter.flush();
+	    		
+	    		BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+	    		String inputLine;
+	    		StringBuffer response = new StringBuffer();
+	    		
+	    		while ((inputLine = in.readLine())!= null)
+	    		{
+	    			response.append(inputLine);
+	    		}
+	    		in.close();
+	    		
+	    		queryResult = response.toString();
+	    	}
+	    	finally
+	    	{
+	    		connection.disconnect();
+	    	}
+	    	return queryResult;
+	    }
+}
