@@ -4,25 +4,25 @@ var Access_Token;
 function sendRequest()
 {
 	var buttonValue = document.getElementById('indexButton1').value;
-	if(buttonValue == "Send Request")
+	if(buttonValue == "SendRequest")
 	{
 		var queryString = "type=button&value="+buttonValue;
-		doAjax('AppServlet', queryString, 'sendRequest_back', 'post', 0);
+		doAjax('AppServlet', queryString, 'sendRequest_back', 'POST', 0);
 	}
 }
 
 function sendRequest_back(result)
 {
-	window.document.getElementById('sendRequestResult').style.display = 'block';
-	window.document.getElementById('sendRequestResult').innerHTML = "<p>Hello world</p>";
+	window.location = result;
 }
 
 function getAccessToken()
 {
+	Code = window.location.href.substring(41);
 	var buttonValue = document.getElementById('indexButton2').value;
-	if(buttonValue == "Get Access Token")
+	if(buttonValue == "GetAccessToken")
 	{
-		var queryString = "type=button&value="+buttonValue;
+		var queryString = "value="+buttonValue+"&code="+Code;
 		doAjax('AppServlet', queryString, 'getAccessToken_back', 'post', 0);
 	}
 }
@@ -30,14 +30,14 @@ function getAccessToken()
 function getAccessToken_back(result)
 {
 	window.document.getElementById('getAccessTokenResult').style.display = 'block';
-	window.document.getElementById('getAccessTokenResult').innerHTML = "<p>"+result+"</p>";
+	window.document.getElementById('getAccessTokenResult').innerHTML = "<p>How are you doing?</p><br><p>"+result+"</p>";
 }
 
 
 function getAccountInfo()
 {
 	var buttonValue = document.getElementById('indexButton3').value;
-	if(buttonValue === "Get Account Info")
+	if(buttonValue === "GetAccountInfo")
 	{
 		var queryString = "type=button&value="+buttonValue;
 		doAjax('AppServlet', queryString, 'getAccountInfo_back', 'post', 0);
@@ -53,7 +53,7 @@ function getAccountInfo_back(result)
 function uploadFile()
 {
 	var buttonValue = document.getElementById('indexButton4').value;
-	if(buttonValue === "Upload File")
+	if(buttonValue === "UploadFile")
 	{
 		var queryString = "type=button&value="+buttonValue;
 		doAjax('AppServlet', queryString, 'uploadFile_back', 'post', 0);

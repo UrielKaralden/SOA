@@ -17,7 +17,7 @@ public class DropboxClient
 {
 	private static final String APP_KEY = "feczefcf9r4tqkj";
 	private static final String APP_SECRET = "sc2el4p2lvljrb8";
-	private static final String redirectURI = "http://localhost:8080/RESTful_Services/";
+	private static final String redirectURI = "http://localhost:8080/RESTful_Services";
 	
 	public DropboxClient(){}
 	
@@ -37,11 +37,10 @@ public class DropboxClient
 	    
 	    public String GetAccessToken (String codeStr) throws URISyntaxException, IOException
 	    {
-	    	String code = "" + codeStr;
 	    	String queryResult;
 	    	
 	    	StringBuilder tokenUri = new StringBuilder("code=");
-	    	tokenUri.append(URLEncoder.encode(code, "UTF-8"));
+	    	tokenUri.append(URLEncoder.encode(codeStr, "UTF-8"));
 	    	tokenUri.append("&grant_type=");
 	    	tokenUri.append(URLEncoder.encode("authorization_code", "UTF-8"));
 	    	tokenUri.append("&client_id=");
@@ -50,7 +49,7 @@ public class DropboxClient
 	    	tokenUri.append(URLEncoder.encode(APP_SECRET, "UTF-8"));
 	    	tokenUri.append("&redirect_uri="+redirectURI);
 	    	
-	    	URL url = new URL("https://api.dropbox.com/oauth2/token");
+	    	URL url = new URL("https://api.dropboxapi.com/oauth2/token");
 	    	
 	    	HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 	    	try
@@ -81,7 +80,7 @@ public class DropboxClient
 	    	{
 	    		connection.disconnect();
 	    	}
-	    	
+	    	System.out.println(queryResult);
 	    	return queryResult;
 	    }
 	    
@@ -122,6 +121,7 @@ public class DropboxClient
 	    	{
 	    		connection.disconnect();
 	    	}
+	    	System.out.println(queryResult);
 	    	return queryResult;
 	    }
 	    
@@ -166,6 +166,8 @@ public class DropboxClient
 	    	{
 	    		connection.disconnect();
 	    	}
+	    	System.out.println("Show something");
+	    	System.out.println(queryResult);
 	    	return queryResult;
 	    }
 }

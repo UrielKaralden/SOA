@@ -42,52 +42,49 @@ public class AppServlet extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
 		DropboxClient client = new DropboxClient();
+		String Result = "";
+		String Access_Token = "";
 		
 		PrintWriter out = response.getWriter();
-		String sendRequestButton = request.getParameter("indexButton1");
-		String getAccessTokenButton = request.getParameter("indexButton2");
-		String getAccountInfoButton = request.getParameter("indexButton3");
-		String uploadFileButton = request.getParameter("indexButton4");
+
+		String value = request.getParameter("value").trim();
+		System.out.println("Value = " +value);
 		
-		if(sendRequestButton != null)
+		if(value.equals("SendRequest"))
 		{
 			try {
-				out.write(client.sendRequest());
+				Result = client.sendRequest();
+				System.out.println(Result);
+				out.write(Result);
 				out.flush();
 			}catch(Exception e) {
 				e.printStackTrace();
 			}
 		}
 		
-		if (getAccessTokenButton != null)
+		else if(value.equals("GetAccessToken"))
 		{
-			ScriptEngineManager engineManager = new ScriptEngineManager();
-			ScriptEngine jsEngine = engineManager.getEngineByName("JavaScript");
-			String Code = jsEngine.get("Code").toString();
-			
 			try {
-				out.write(client.GetAccessToken(Code));
+				String Code = request.getParameter("code");
+				Access_Token = client.GetAccessToken(Code);
+				out.write(Access_Token);
 				out.flush();
 			}catch(Exception e){
 				e.printStackTrace();
 			}
 		}
 		
-		if (getAccountInfoButton != null)
-		{
-			ScriptEngineManager engineManager = new ScriptEngineManager();
-			ScriptEngine jsEngine = engineManager.getEngineByName("JavaScript");
-			String token = jsEngine.get("Access_Token").toString();
-			
+		else if(value.equals("GetAccountInfo"))
+		{		
 			String accountID = "";
 			try {
-				accountID = jsEngine.eval("window.document.getParameterById(\"accountID\")").toString();
+				//accountID = jsEngine.eval("window.document.getParameterById(\"accountID\")").toString();
 			}catch(Exception e) {
 				e.printStackTrace();
 			}
 			
 			try {
-				out.write(client.getAccountInfo(token, accountID));
+				out.write(client.getAccountInfo(Access_Token, accountID));
 				out.flush();
 			}catch(Exception e){
 				e.printStackTrace();
@@ -95,7 +92,7 @@ public class AppServlet extends HttpServlet {
 			
 		}
 		
-		if (uploadFileButton != null)
+		else if(value.equals("UploadFile"))
 		{
 			ScriptEngineManager engineManager = new ScriptEngineManager();
 			ScriptEngine jsEngine = engineManager.getEngineByName("JavaScript");
