@@ -44,9 +44,12 @@ public class AppServlet extends HttpServlet {
 		DropboxClient client = new DropboxClient();
 		
 		PrintWriter out = response.getWriter();
-
-		String indexButton = request.getParameter("indexButton");
-		if (indexButton.equals("Send Request"))
+		String sendRequestButton = request.getParameter("indexButton1");
+		String getAccessTokenButton = request.getParameter("indexButton2");
+		String getAccountInfoButton = request.getParameter("indexButton3");
+		String uploadFileButton = request.getParameter("indexButton4");
+		
+		if(sendRequestButton != null)
 		{
 			try {
 				out.write(client.sendRequest());
@@ -55,7 +58,8 @@ public class AppServlet extends HttpServlet {
 				e.printStackTrace();
 			}
 		}
-		else if (indexButton.equals("Get Access Token"))
+		
+		if (getAccessTokenButton != null)
 		{
 			ScriptEngineManager engineManager = new ScriptEngineManager();
 			ScriptEngine jsEngine = engineManager.getEngineByName("JavaScript");
@@ -68,7 +72,8 @@ public class AppServlet extends HttpServlet {
 				e.printStackTrace();
 			}
 		}
-		else if (indexButton.equals("Get Account Info"))
+		
+		if (getAccountInfoButton != null)
 		{
 			ScriptEngineManager engineManager = new ScriptEngineManager();
 			ScriptEngine jsEngine = engineManager.getEngineByName("JavaScript");
@@ -89,7 +94,8 @@ public class AppServlet extends HttpServlet {
 			}
 			
 		}
-		else if (indexButton.equals("Upload File"))
+		
+		if (uploadFileButton != null)
 		{
 			ScriptEngineManager engineManager = new ScriptEngineManager();
 			ScriptEngine jsEngine = engineManager.getEngineByName("JavaScript");
