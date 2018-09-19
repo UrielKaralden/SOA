@@ -3,8 +3,6 @@ package servlets;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -42,8 +40,6 @@ public class AppServlet extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
 		DropboxClient client = new DropboxClient();
-		String Result = "";
-		String Access_Token = "";
 		
 		PrintWriter out = response.getWriter();
 
@@ -53,7 +49,7 @@ public class AppServlet extends HttpServlet {
 		if(value.equals("SendRequest"))
 		{
 			try {
-				Result = client.sendRequest();
+				String Result = client.sendRequest();
 				System.out.println(Result);
 				out.write(Result);
 				out.flush();
@@ -66,7 +62,7 @@ public class AppServlet extends HttpServlet {
 		{
 			try {
 				String Code = request.getParameter("code");
-				Access_Token = client.GetAccessToken(Code);
+				String Access_Token = client.GetAccessToken(Code);
 				out.write(Access_Token);
 				out.flush();
 			}catch(Exception e){
@@ -76,15 +72,11 @@ public class AppServlet extends HttpServlet {
 		
 		else if(value.equals("GetAccountInfo"))
 		{		
-			String accountID = "";
-			try {
-				//accountID = jsEngine.eval("window.document.getParameterById(\"accountID\")").toString();
-			}catch(Exception e) {
-				e.printStackTrace();
-			}
+			String accountID = request.getParameter("account_id");
+			String token = request.getParameter("access_token");
 			
 			try {
-				out.write(client.getAccountInfo(Access_Token, accountID));
+				out.write(client.getAccountInfo(token, accountID));
 				out.flush();
 			}catch(Exception e){
 				e.printStackTrace();
@@ -94,19 +86,24 @@ public class AppServlet extends HttpServlet {
 		
 		else if(value.equals("UploadFile"))
 		{
-			ScriptEngineManager engineManager = new ScriptEngineManager();
-			ScriptEngine jsEngine = engineManager.getEngineByName("JavaScript");
-			String token = jsEngine.get("Access_Token").toString();
+			String token = request.getParameter("access_token");
+			String filePath = "../../jeje.jpeg";//request.getParameter("file_path");
 			
-			String filePath = "";
 			try {
-				filePath = jsEngine.eval("window.document.getParameterById(\"fileToUpload\").value").toString();
-			}catch(Exception e) {
+				client.uploadFile(token, filePath);
+				out.flush();
+			}catch(Exception e){
 				e.printStackTrace();
 			}
+		}
+		
+		else if(value.equals("ListSharedLinks"))
+		{
 			
+			String token = request.getParameter("access_token");
+			String cursor = request.getParameter("cursor");
 			try {
-				out.write(client.uploadFile(token, filePath));
+				out.write(client.listSharedLinks(token, cursor));
 				out.flush();
 			}catch(Exception e){
 				e.printStackTrace();

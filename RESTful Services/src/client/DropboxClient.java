@@ -1,8 +1,10 @@
 package client;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URI;
@@ -12,6 +14,10 @@ import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collection;
+import java.util.Iterator;
+
+import org.apache.commons.io.FileUtils;
 
 public class DropboxClient 
 {
@@ -38,6 +44,7 @@ public class DropboxClient
 	    public String GetAccessToken (String codeStr) throws URISyntaxException, IOException
 	    {
 	    	String queryResult;
+	    	System.out.println("codeStr = "+codeStr);
 	    	
 	    	StringBuilder tokenUri = new StringBuilder("code=");
 	    	tokenUri.append(URLEncoder.encode(codeStr, "UTF-8"));
@@ -49,15 +56,18 @@ public class DropboxClient
 	    	tokenUri.append(URLEncoder.encode(APP_SECRET, "UTF-8"));
 	    	tokenUri.append("&redirect_uri="+redirectURI);
 	    	
-	    	URL url = new URL("https://api.dropboxapi.com/oauth2/token");
+	    	System.out.println(tokenUri);
+	    	URL url = new URL("https://api.dropbox.com/oauth2/token");
 	    	
 	    	HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 	    	try
 	    	{
+	    		connection.setDoInput(true);
 	    		connection.setDoOutput(true);
 	    		connection.setRequestMethod("POST");
 	    		connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-	    		connection.setRequestProperty("Content-Length",""+tokenUri.toString().length());
+	    		//connection.setRequestProperty("Content-Length",""+tokenUri.toString().length());
+	    		connection.connect();
 	    		
 	    		OutputStreamWriter outputStreamWriter = new OutputStreamWriter(connection.getOutputStream());
 	    		outputStreamWriter.write(tokenUri.toString());
@@ -128,11 +138,11 @@ public class DropboxClient
 	    public String uploadFile(String token, String path) throws URISyntaxException, IOException
 	    {
 	    	String queryResult;
-	    	String access_token = "" + token;
-	    	String sourcePath = "" + path;
-	    	Path pathFile = Paths.get(sourcePath);
+
+	    	Path pathFile = Paths.get(path);
+	    	System.out.println(pathFile);
 	    	byte[] data = Files.readAllBytes(pathFile);
-	    	String content = "{\"path\": \"/RESTful_Services_files/images/image.png\",\"mode\":\"add\",\"autorename\":true,\"mute\":false, \"strict_conflict\":false";
+	    	String content = "{\"path\": \"image.png\",\"mode\":\"add\",\"autorename\":true,\"mute\":false, \"strict_conflict\":false}";
 	    	
 	    	URL url = new URL("https://content.dropboxapi.com/2/files/upload");
 	    	
@@ -140,15 +150,19 @@ public class DropboxClient
 	    	try
 	    	{
 	    		connection.setDoOutput(true);
+	    		connection.setDoInput(true);
 	    		connection.setRequestMethod("POST");
-	    		connection.setRequestProperty("Authorization", "Bearer " + access_token);
+	    		connection.setRequestProperty("Authorization", "Bearer " + token);
+	    		connection.setRequestProperty("Dropbox-API-Arg", content);
 	    		connection.setRequestProperty("Content-Type", "application/octet-stream");
-	    		connection.setRequestProperty("Dropbox-API-Arg", "" + content);
 	    		connection.setRequestProperty("Content-Length", String.valueOf(data.length));
 	    		
-	    		OutputStreamWriter outputStreamWriter = new OutputStreamWriter(connection.getOutputStream());
-	    		outputStreamWriter.write(content);
-	    		outputStreamWriter.flush();
+	    		OutputStream outputStream = connection.getOutputStream();
+
+	    		outputStream.write(data);
+	    		outputStream.flush();
+	    		outputStream.close();
+	    		connection.connect();
 	    		
 	    		BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 	    		String inputLine;
@@ -167,6 +181,46 @@ public class DropboxClient
 	    		connection.disconnect();
 	    	}
 	    	System.out.println("Show something");
+	    	System.out.println(queryResult);
+	    	return queryResult;
+	    }
+	    
+	    public String listSharedLinks(String token, String cursor)throws URISyntaxException, IOException
+	    {
+	    	String queryResult = "";
+	    	String content = "{\"cursor\":"+cursor+"}";
+	    	URL url = new URL("https://api.dropboxapi.com/2/sharing/list_shared_links");
+	    	
+	    	HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+	    	try
+	    	{
+	    		System.out.println("Executing List Shared Links");
+	    		connection.setDoOutput(true);
+	    		connection.setRequestMethod("POST");
+	    		connection.setRequestProperty("Authorization", "Bearer " + token);
+	    		connection.setRequestProperty("Content-Type", "application/json");
+	    		connection.setRequestProperty("Data", content);
+	    		
+	    		/*OutputStreamWriter outputStreamWriter = new OutputStreamWriter(connection.getOutputStream());
+	    		outputStreamWriter.write(content);
+	    		outputStreamWriter.flush();*/
+	    		
+	    		BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+	    		String inputLine;
+	    		StringBuffer response = new StringBuffer();
+	    		
+	    		while ((inputLine = in.readLine())!= null)
+	    		{
+	    			response.append(inputLine);
+	    		}
+	    		in.close();
+	    		
+	    		queryResult = response.toString();
+	    	}
+	    	finally
+	    	{
+	    		connection.disconnect();
+	    	}
 	    	System.out.println(queryResult);
 	    	return queryResult;
 	    }
