@@ -1,8 +1,29 @@
 var Code;
 var Access_Token;
 var AccountID;
-var Cursor;
 
+
+function syntaxHighlight(json) {
+    if (typeof json != 'string') {
+         json = JSON.stringify(json, undefined, 2);
+    }
+    json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+        var cls = 'number';
+        if (/^"/.test(match)) {
+            if (/:$/.test(match)) {
+                cls = 'key';
+            } else {
+                cls = 'string';
+            }
+        } else if (/true|false/.test(match)) {
+            cls = 'boolean';
+        } else if (/null/.test(match)) {
+            cls = 'null';
+        }
+        return '<span class="' + cls + '">' + match + '</span>';
+    });
+}
 
 function sendRequest()
 {
@@ -80,6 +101,8 @@ function uploadFile()
 	FilePath = FilePath.substring(12);
 	window.document.getElementById('uploadFilePath').style.display = 'block';
 	window.document.getElementById('uploadFilePath').innerHTML = "<p>"+FilePath+"</p>";
+	window.document.getElementById('uploadFileResult').style.display = 'block';
+	window.document.getElementById('uploadFileResult').innerHTML = "<p>"+"Method executed successfully"+"<br>"+result+"</p>";
 	if(buttonValue === "UploadFile")
 	{
 		var queryString = "value="+buttonValue+"&access_token="+Access_Token+"&file_path="+FilePath;
@@ -90,24 +113,24 @@ function uploadFile()
 function uploadFile_back(result)
 {
 	window.document.getElementById('uploadFileResult').style.display = 'block';
-	window.document.getElementById('uploadFileResult').innerHTML = "<p>"+"Method executed successfully"+"</p>";
+	window.document.getElementById('uploadFileResult').innerHTML = "<p>"+"Method executed successfully"+"<br>"+result+"</p>";
 }
 
 function listSharedLinks()
 {
-	window.document.getElemebtById('prueba').style.display = 'block';
+	var buttonValue = document.getElementById('indexButton5').value;
+	window.document.getElementById('prueba').style.display = 'block';
 	window.document.getElementById('prueba').innerHTML = "<p>Button used</p><br>";
-	var queryString = "value="+buttonValue+"&access_token="+Access_Token+"&cursor="+Cursor;
+	var queryString = "value="+buttonValue+"&access_token="+Access_Token;
 	doAjax('AppServlet', queryString, 'listSharedLinks_back', 'post', 0);
 }
 
 function listSharedLinks_back(result)
 {
+	var total_links = 0;
+	var SharedLinks = JSON.stringify(result);
 	
-	/*window.document.getElementById('listSharedLinksResult').style.display = 'block';
-	window.document.getElementById('listSharedLinksResult').innerHTML = "<p>Hey Im working</p>";
-	Cursor = "";*/
+	window.document.getElementById('listSharedLinksResult').style.display = 'block';
+	window.document.getElementById('listSharedLinksResult').innerHTML = "<p>"+SharedLinks+"</p>";
 }
-
-document.getElementById("ListSharedLinks").addEventListener("click", listSharedLinks);
 // more functions to be used

@@ -42,7 +42,7 @@ public class AppServlet extends HttpServlet {
 		DropboxClient client = new DropboxClient();
 		
 		PrintWriter out = response.getWriter();
-
+		System.out.println("hola");
 		String value = request.getParameter("value").trim();
 		System.out.println("Value = " +value);
 		
@@ -101,9 +101,8 @@ public class AppServlet extends HttpServlet {
 		{
 			
 			String token = request.getParameter("access_token");
-			String cursor = request.getParameter("cursor");
 			try {
-				out.write(client.listSharedLinks(token, cursor));
+				out.write(client.listSharedLinks(token));
 				out.flush();
 			}catch(Exception e){
 				e.printStackTrace();

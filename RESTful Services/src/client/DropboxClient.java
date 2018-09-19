@@ -66,7 +66,7 @@ public class DropboxClient
 	    		connection.setDoOutput(true);
 	    		connection.setRequestMethod("POST");
 	    		connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-	    		//connection.setRequestProperty("Content-Length",""+tokenUri.toString().length());
+	    		connection.setRequestProperty("Content-Length",""+tokenUri.toString().length());
 	    		connection.connect();
 	    		
 	    		OutputStreamWriter outputStreamWriter = new OutputStreamWriter(connection.getOutputStream());
@@ -185,10 +185,9 @@ public class DropboxClient
 	    	return queryResult;
 	    }
 	    
-	    public String listSharedLinks(String token, String cursor)throws URISyntaxException, IOException
+	    public String listSharedLinks(String token)throws URISyntaxException, IOException
 	    {
 	    	String queryResult = "";
-	    	String content = "{\"cursor\":"+cursor+"}";
 	    	URL url = new URL("https://api.dropboxapi.com/2/sharing/list_shared_links");
 	    	
 	    	HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -198,11 +197,9 @@ public class DropboxClient
 	    		connection.setDoOutput(true);
 	    		connection.setRequestMethod("POST");
 	    		connection.setRequestProperty("Authorization", "Bearer " + token);
-	    		connection.setRequestProperty("Content-Type", "application/json");
-	    		connection.setRequestProperty("Data", content);
 	    		
 	    		/*OutputStreamWriter outputStreamWriter = new OutputStreamWriter(connection.getOutputStream());
-	    		outputStreamWriter.write(content);
+	    		outputStreamWriter.write();
 	    		outputStreamWriter.flush();*/
 	    		
 	    		BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
